@@ -112,7 +112,7 @@ const updatReservation = async (req, res) => {
  
   
   try {
-    const { id,reservation_time,division,room_num,user_name,work_name,flat_name
+    const { id,reservation_time,division,room_num,work_name,flat_name
     } = req.body; // Extract name from the request body   
     if (!id) {      
       return res.status(400).json({ message: 'id is required' });
@@ -120,20 +120,14 @@ const updatReservation = async (req, res) => {
     
     const reservation = await Reservation.findByPk(id);    
     if (!reservation) {
-      logger.logError(user.useremail+'ユーザーから存在しない予約の変更要請がありました。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+      logger.logError('ユーザーから存在しない予約の変更要請がありました。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
       return res.status(404).json({ message: 'Reservation not found' });
-    }
-    console.log(req.user);
-    if (req.user.role === "user") {
-      if (reservation.user_name!== String(req.user.id)) {
-        return res.status(404).json({ message: 'Reservation not found' });
-      }
-    }   
+    }    
     
     reservation.reservation_time = reservation_time || reservation.reservation_time; 
     reservation.division = division || reservation.division;
     reservation.room_num = room_num || reservation.room_num;
-    reservation.user_name = user_name || reservation.user_name;
+    // reservation.user_name = user_name || reservation.user_name;
     reservation.work_name = work_name || reservation.work_name;
     reservation.flat_name = flat_name || reservation.flat_name;
 
@@ -163,7 +157,6 @@ const updatReservation = async (req, res) => {
   }
 };
 const findWork = async (req, res) => {
-  console.log("aaaaaaaaaa");
   
   try {
     const { room_num, flat_name } = req.body;
@@ -248,11 +241,11 @@ function __getDatesBetween(startTime, endTime) {
 }
 const createReservation = async (req, res) => {  
   try {
-    const {user_name,flat_name,room_num,work_name,reservation_time,division} = req.body;
+    const {flat_name,room_num,work_name,reservation_time,division} = req.body;
     if (!flat_name || !room_num || !work_name || !reservation_time || !division) {
       return res.status(400).json({ message: 'All required fields must be filled' });
     }
-    const newReservation = await Reservation.create({user_name:user_name?user_name:req.user.id, flat_name,room_num,work_name,reservation_time,division});
+    const newReservation = await Reservation.create({flat_name,room_num,work_name,reservation_time,division});
     logger.logImportantInfo('新しい予約が作成されました。'+'予約番号は'+newReservation.id+'です。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip); 
     res.status(201).json(newReservation);
   } catch (err) {

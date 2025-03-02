@@ -63,8 +63,8 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reservation',reservationRoutes);
-app.use('/api/flat',flatRoutes);
-app.use('/api/work',workRoutes);
+app.use('/api/flat',authenticate,flatRoutes);
+app.use('/api/work',authenticate,workRoutes);
 app.use('/api/user',userRoutes);
 app.use('/api/log',authenticate,logRoutes);
 
