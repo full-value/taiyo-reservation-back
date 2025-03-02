@@ -61,53 +61,61 @@ const findReservation = async (req, res) => {
 };
 const findChangeDate = async (req, res) => {
   try {
-    const { reservation_id } = req.body; // Extract name from the request body   
-    // If no name is provided, return a 400 error
+    const { reservation_id } = req.body; // Extract reservation_id from the request body   
+
     if (!reservation_id) {
       return res.status(400).json({ message: 'reservation_id is required' });
     }
 
-    // Use Sequelize's Op.like to search for flats that partially match the name
-    const reservations = await Reservation.findOne({
-      where: {id: reservation_id }
+    // Fetch the reservation
+    const reservation = await Reservation.findOne({
+      where: { id: reservation_id }
     });
 
-    
-    if (reservations.length === 0) {
-      return res.status(404).json({ message: 'No reservations found with that id' });
+    if (!reservation) {
+      return res.status(404).json({ message: 'No reservation found with that id' });
     }   
-    const { room_num, work_name, flat_name } = reservations.dataValues;
-    const whereConditions = {
-      flat_name: flat_name,
-      work_name: work_name,
-      room_num : room_num
-    };     
+
+    const { room_num, work_name, flat_name } = reservation.dataValues;
+    const whereConditions = { flat_name, work_name, room_num };
     
-    const works = await Work.findAll({
-      where: whereConditions,
-    });
+    console.log("Search conditions:", whereConditions);
+
+    // Find matching works
+    const works = await Work.findAll({ where: whereConditions });
 
     if (works.length === 0) {
       return res.status(404).json({ message: 'No matching works found for the given reservation' });
     }
-    const allDates = works.flatMap(work =>
+
+    // Ensure __getDatesBetween function exists
+    if (typeof __getDatesBetween !== "function") {
+      throw new Error("Function __getDatesBetween is not defined");
+    }
+
+    const allDates = works.flatMap(work => 
       __getDatesBetween(work.start_time, work.end_time)
     );
-    const bookedReservations = await Reservation.findAll({
-      where: whereConditions,
-    });
-    const reservedDates = bookedReservations.flatMap(reservation => 
-     reservation.dataValues.reservation_time.toISOString().split('T')[0]
-    );
-    const availableDates = allDates.filter(date => {
-      return !reservedDates.includes(date);
-    });
-    return res.status(200).json({availableDates}); // Return the found flats as a response
+
+    // Find booked reservations
+    const bookedReservations = await Reservation.findAll({ where: whereConditions });
+
+    // Extract reserved dates safely
+    const reservedDates = bookedReservations
+      .filter(res => res.dataValues.reservation_time)
+      .map(res => res.dataValues.reservation_time.toISOString().split('T')[0]);
+
+    // Compute available dates
+    const availableDates = allDates.filter(date => !reservedDates.includes(date));
+    
+    return res.status(200).json({ availableDates });
+
   } catch (err) {
-    console.error(err);
+    console.error("Error in findChangeDate:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 const updatReservation = async (req, res) => {
  
   
@@ -246,7 +254,7 @@ const createReservation = async (req, res) => {
       return res.status(400).json({ message: 'All required fields must be filled' });
     }
     const newReservation = await Reservation.create({flat_name,room_num,work_name,reservation_time,division});
-    logger.logImportantInfo('新しい予約が作成されました。'+'予約番号は'+newReservation.id+'です。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip); 
+    logger.logImportantInfo('新しい予約が作成されました。'+'予約番号は'+newReservation.id+'です。', req.id, req.originalUrl, req.method, res.statusCode, "", req.ip); 
     res.status(201).json(newReservation);
   } catch (err) {
     console.error(err);

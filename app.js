@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.post('/upload', upload.single('file'), async (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {  
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
@@ -63,7 +63,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reservation',reservationRoutes);
-app.use('/api/flat',authenticate,flatRoutes);
+app.use('/api/flat',flatRoutes);
 app.use('/api/work',workRoutes);
 app.use('/api/user',userRoutes);
 app.use('/api/log',authenticate,logRoutes);

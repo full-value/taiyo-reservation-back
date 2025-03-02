@@ -36,7 +36,7 @@ const changeWork = async (req, res) => {
       changeWork.end_time= end_time; 
     
     await changeWork.save();
-    logger.logInfo(req.user.useremail+'管理者によって'+changeWork.work_name+'案件が変更されました。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+    logger.logInfo('管理者によって'+changeWork.work_name+'案件が変更されました。', req.id, req.originalUrl, req.method, res.statusCode,"" ,req.ip);
     return res.status(200).json(changeWork);
   } catch (err) {
     console.error(err);
@@ -46,13 +46,12 @@ const changeWork = async (req, res) => {
 const createWork = async (req, res) => {  
  
   try {
-    const { work_name,flat_name, room_num, start_time, end_time} = req.body;
-    console.log("asdfsd",work_name,flat_name, room_num, start_time, end_time);
+    const { work_name,flat_name, room_num, start_time, end_time} = req.body;    
     if ( !work_name||!flat_name||!room_num||!start_time||!end_time) {
       return res.status(400).json({ message: 'All required fields must be filled' });
     }    
     const newWork = await Work.create({work_name,flat_name, room_num, start_time, end_time});
-    logger.logInfo(req.user.useremail+'管理者によって'+newWork.work_name+'案件が登録されました。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+    logger.logInfo('管理者によって'+newWork.work_name+'案件が登録されました。', req.id, req.originalUrl, req.method, res.statusCode,"", req.ip);
     res.status(201).json(newWork);
   } catch (err) {
     console.error(err);
@@ -71,9 +70,9 @@ const deleteWork = async (req, res) => {
       return res.status(404).json({ message: 'Flat not found' });
     }
     await Work.destroy({ where: { id } });
-    logger.logInfo(req.user.useremail+'管理者によって'+WorkToDelete.work_name+'案件が削除されました。', req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+    logger.logInfo('管理者によって'+WorkToDelete.work_name+'案件が削除されました。', req.id, req.originalUrl, req.method, res.statusCode, "", req.ip);
 
-    res.status(200).json({ message: 'Flat deleted successfully', Work: WorkToDelete });
+    res.status(201).json({Work: WorkToDelete});
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

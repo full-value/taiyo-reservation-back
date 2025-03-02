@@ -30,9 +30,9 @@ const changeFlat = async (req, res) => {
       return res.status(404).json({ message: 'flat not found' });
     }    
     if (flat.name !== name && flat.address !== address) {
-      logger.logInfo(req.user.useremail+'管理者によって'+flat.name+'物件の名前が'+name+"に住所が"+flat.address+"に変更されました。", req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+      logger.logInfo('管理者によって'+flat.name+'物件の名前が'+name+"に住所が"+flat.address+"に変更されました。", req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
     }else if(flat.name === name && flat.address !== address){
-      logger.logInfo(req.user.useremail+'管理者によって'+flat.name+'物件の住所が'+flat.address+"に変更されました。", req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
+      logger.logInfo('管理者によって'+flat.name+'物件の住所が'+flat.address+"に変更されました。", req.id, req.originalUrl, req.method, res.statusCode, req.user?req.user.id : null, req.ip);
     }
     flat.name = name; 
     flat.address = address; 
@@ -62,7 +62,6 @@ const createFlat = async (req, res) => {
 const deleteFlat = async (req, res) => {
   try {
     const { id } = req.body;
-   
     if (!id) {
       return res.status(400).json({ message: 'All required fields must be filled' });
     }
