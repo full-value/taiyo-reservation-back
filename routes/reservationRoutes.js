@@ -3,7 +3,7 @@ const {
         findFlat, findWork, findReservation, findChangeDate, 
         updatReservation, getChangeableDate, createReservation,
         getReservations,getReservationListData,deleteReservation
-        ,getDashboardData
+        ,getDashboardData,findReservationByRoomNum
      } = require('../controllers/reservationController');
 
 const router = express.Router();
@@ -12,6 +12,7 @@ const router = express.Router();
 router.post('/findFlat',findFlat);
 router.post('/findWork',findWork);
 router.post('/findReservation',findReservation);
+router.post('/findReservationByRoomNum',findReservationByRoomNum);
 router.post('/findChangeDate',findChangeDate);
 router.post('/updateReservation',updatReservation);
 router.post('/getChangeableDate',getChangeableDate);

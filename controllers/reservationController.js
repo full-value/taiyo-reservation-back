@@ -59,6 +59,39 @@ const findReservation = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+const findReservationByRoomNum = async (req, res) => {
+  try {
+    const { flat_name,room_num,work_name} = req.body; // Extract name from the request body   
+
+    // If no name is provided, return a 400 error
+    if (!flat_name) {
+      return res.status(400).json({ message: 'flat_name is required' });
+    }
+
+ 
+    const reservations = await Reservation.findAll({
+      where: {
+        flat_name: flat_name,
+        room_num: room_num,
+        work_name: work_name,
+        reservation_time: {
+          [Op.gte]: Sequelize.fn('NOW')  // Corrected: Use 'NOW()' instead of 'CURRENT'
+        }
+      }
+    });
+
+    if (reservations.length === 0) {
+      return res.status(404).json({ message: 'No reservations found with that id' });
+    }
+    const dataValues = reservations.map(reservation => reservation.dataValues);
+    return res.status(200).json({dataValues}); // Return the found flats as a response
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 const findChangeDate = async (req, res) => {
   try {
     const { reservation_id } = req.body; // Extract reservation_id from the request body   
@@ -265,7 +298,15 @@ const getReservations = async (req, res) => {
   
   try {  
     const {flat_name,room_num} = req.body;
-    const bookedReservations = await Reservation.findAll({where:{flat_name:flat_name,room_num:room_num}}); 
+    const bookedReservations = await Reservation.findAll(
+        {where:{
+            flat_name:flat_name,
+            room_num:room_num,
+            reservation_time: {
+              [Op.gte]: Sequelize.fn('NOW')  // Corrected: Use 'NOW()' instead of 'CURRENT'
+            }
+          }
+        }); 
 
     const dataValues = bookedReservations.map(reservation => {
       const reservationTime = new Date(reservation.dataValues.reservation_time);
@@ -348,7 +389,7 @@ const getDashboardData = async (req, res) => {
       ],
       where: {
         reservation_time: {
-          [Op.gte]: Sequelize.fn('DATE_SUB', Sequelize.fn('CURDATE'), Sequelize.literal('INTERVAL 12 MONTH')), // 現在から過去12ヶ月
+          [Op.gte]: Sequelize.fn('DATE_SUB', Sequelize.fn('CURDATE'), Sequelize.literal('INTERVAL 13 MONTH')), // 現在から過去12ヶ月
           [Op.lte]: Sequelize.fn('CURDATE'), // 現在の日付
         },
       },
@@ -376,4 +417,4 @@ module.exports = {
   findFlat, findWork, findReservation, findChangeDate, 
   updatReservation,  getChangeableDate, createReservation,
    getReservations,getReservationListData,deleteReservation, 
-   getDashboardData};
+   getDashboardData,findReservationByRoomNum};

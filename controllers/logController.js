@@ -11,19 +11,19 @@ const getErrorData = async (req, res) => {
         attributes: ['id', 'level', 'message', 'timestamp'],
       });    
 
-
     const dataValues = ErrorData.map(error => error.dataValues);
     if (dataValues.length === 0) {
-      return res.status(404).json({ message: 'No matching works found for the given reservation' });
+      return res.status(404).json({ message: '指定された条件に一致するエラーログは見つかりませんでした' }); // No matching error logs found
     }   
     
     res.status(201).json(dataValues);
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
+
 const getChangeData = async (req, res) => {  
   try {  
     const ChangeData = await Log.findAll({
@@ -33,19 +33,19 @@ const getChangeData = async (req, res) => {
         attributes: ['id', 'level', 'message', 'timestamp'],
       });    
 
-
     const dataValues = ChangeData.map(data => data.dataValues);
     if (dataValues.length === 0) {
-      return res.status(404).json({ message: 'No matching works found for the given reservation' });
+      return res.status(404).json({ message: '指定された条件に一致する変更ログは見つかりませんでした' }); // No matching change logs found
     }   
     
     res.status(201).json(dataValues);
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
+
 const getApiLogData = async (req, res) => {  
   const { pageNum, searchTerm } = req.params;
   const limit = 10;  // Or you can pass it as a query parameter
@@ -87,7 +87,7 @@ const getApiLogData = async (req, res) => {
     const dataValues = apiLogData.map(data => data.dataValues);
 
     if (dataValues.length === 0) {
-      return res.status(404).json({ message: 'No matching apiLogs found' });
+      return res.status(404).json({ message: '指定された条件に一致するAPIログは見つかりませんでした' }); 
     }
 
     res.status(200).json({
@@ -101,9 +101,10 @@ const getApiLogData = async (req, res) => {
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
+
 const getNotificationNum = async (req, res) => {  
   try {  
     const NotificationNum = await Log.count({
@@ -119,13 +120,14 @@ const getNotificationNum = async (req, res) => {
       }
     });        
 
-    res.status(201).json({NotificationNum,MessageNum});
+    res.status(201).json({NotificationNum, MessageNum});
     
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
+
 const getNotificationData = async (req, res) => {  
   try {  
     const notificationData = await Log.findAll({
@@ -136,40 +138,28 @@ const getNotificationData = async (req, res) => {
       attributes: ['id', 'level', 'message', 'timestamp'],
     });
 
-    // if (notificationData.length > 0) {
-    //   await Log.update(
-    //     { readStatus: 'read' },
-    //     {
-    //       where: {
-    //         level: 'important',
-    //         readStatus: 'unread'
-    //       }
-    //     }
-    //   );
-    // }
-
-
-    res.status(200).json({ notificationData});
+    res.status(200).json({ notificationData });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
+
 const getNotificationUpdate = async (req, res) => {  
   try {  
 
     const Notification = await Log.findByPk(req.params.id);
     Notification.readStatus = "read";
     await Notification.save();
-    res.status(200).json({ Notification});
+    res.status(200).json({ Notification });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'サーバーエラー' }); 
   }
 };
 
 module.exports = { 
-    getErrorData,getChangeData,getApiLogData,getNotificationNum,getNotificationData,getNotificationUpdate
-  };
+    getErrorData, getChangeData, getApiLogData, getNotificationNum, getNotificationData, getNotificationUpdate
+};
