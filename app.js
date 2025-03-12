@@ -19,7 +19,8 @@ app.use(cors());
 const storage = multer.diskStorage({
   destination: './uploads',
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+    const nameWithoutExt = file.originalname.replace(path.extname(file.originalname), ''); 
+    cb(null, nameWithoutExt + '_' + Date.now() + path.extname(file.originalname));
   },
 });
 const upload = multer({ storage });
@@ -28,13 +29,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
-
-  try {
-    const data = await processExcel(req.file.path);
-    return res.json({ message: 'File processed successfully', data });
-  } catch (error) {
-    res.status(500).json({ message: 'Error processing file', error });
+  if (path.extname(req.file.originalname)=== '.xlsx') {
+    try {
+      const data = await processExcel(req.file.path);
+      return res.json({ message: 'File processed successfully', data });
+    } catch (error) {
+      res.status(500).json({ message: 'Error processing file', error });
+    }
   }
+
+  
 });
 app.use((req, res, next) => {
   req.id = uuidv4(); // Generate a unique request ID

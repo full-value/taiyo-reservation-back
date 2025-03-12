@@ -1,5 +1,6 @@
 const { Op } = require('sequelize'); 
-const Flat = require('../models/Flat'); 
+const Flat = require('../models/Flat');
+const Work = require('../models/Work'); 
 const logger = require('../logger');
 
 // Find Flat by partial match on the name
@@ -50,7 +51,7 @@ const changeFlat = async (req, res) => {
 
 const createFlat = async (req, res) => {  
   try {
-    const { name, address } = req.body;
+    const { name, address,works } = req.body;
     
     if (!name || !address) {
       return res.status(400).json({ message: '全ての必須項目を入力してください' }); 
@@ -59,6 +60,20 @@ const createFlat = async (req, res) => {
     const newFlat = await Flat.create({ name, address });
     logger.logInfo(`${name} 物件が新規作成されました。`, req.id, req.originalUrl, req.method, res.statusCode, req.user ? req.user.id : null, req.ip);
     res.status(201).json(newFlat); 
+    for (const work of works) {
+      console.log(work);
+      const startTime = new Date(); 
+      const endTime = new Date();
+      endTime.setMonth(endTime.getMonth() + 1);
+  
+      const newWork = await Work.create({
+          work_name: work.workName,
+          room_num: work.roomNum,
+          flat_name: name,
+          start_time: startTime,  
+          end_time: endTime      
+      });
+  }
     
   } catch (err) {
     console.error(err);
