@@ -1,15 +1,6 @@
 const mysql = require('mysql2');
 const Log = require('./models/Log');
 
-// Set up MySQL connection
-const connection = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'reservation_system'
-});
-
-
 const insertLog = async(level, message, req_id, originalUrl, method, statusCode, user_id, ip)=> {
     const logo = await Log.create({ level, message,request_id:req_id,endpoint:originalUrl,method:method,status_code:statusCode,user_id:user_id,ip_address:ip });
 }
